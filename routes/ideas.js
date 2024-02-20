@@ -47,17 +47,28 @@ router.post('/', async (req, res) => {
 // Update idea
 router.put('/:id', async (req, res) => {
   try {
-    const updatedIdea = await Idea.findByIdAndUpdate(
-      req.params.id,
-      {
-        $set: {
-          text: req.body.text,
-          tag: req.body.tag,
+    const idea = await Idea.findById(req.params.id);
+
+    // Match the usernames
+    if (idea.username === req.body.username) {
+      const updatedIdea = await Idea.findByIdAndUpdate(
+        req.params.id,
+        {
+          $set: {
+            text: req.body.text,
+            tag: req.body.tag,
+          },
         },
-      },
-      { new: true }
-    ); // if id doesn't exist, create it
-    res.json({ success: true, data: updatedIdea });
+        { new: true }
+      ); // if id doesn't exist, create it
+      return res.json({ success: true, data: updatedIdea }); //return so only one response sent
+    }
+
+    // Usernames does not match
+    res.status(403).json({
+      success: false,
+      error: 'You are not authorized to update this resources',
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ success: false, error: 'Something went wrong!' });
@@ -67,11 +78,25 @@ router.put('/:id', async (req, res) => {
 // Delete idea
 router.delete('/:id', async (req, res) => {
   try {
-    await Idea.findByIdAndDelete(req.params.id);
-    res.json({ success: true, data: {} });
+    const idea = await Idea.findById(req.params.id);
+
+    // Match the usernames
+    if (idea.username === req.body.username) {
+      await Idea.findByIdAndDelete(req.params.id);
+      return res.json({ success: true, data: {} }); //return so only one response sent
+    }
+
+    // Usernames do not match - 403 Unauthorized
+    res.status(403).json({
+      success: false,
+      error: 'You are not authorized to delete this resources',
+    });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ success: false, error: 'Something went wrong!!' });
+    res.status(500).json({
+      success: false,
+      error: 'Something went wrong!!',
+    });
   }
 });
 

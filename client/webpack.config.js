@@ -3,7 +3,7 @@ const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 module.exports = {
-  mode: 'development',
+  mode: 'production',  //development
   entry: './src/index.js',
   output: {
     path: path.resolve(__dirname, '../public'), //public is the dist folder
@@ -18,6 +18,9 @@ module.exports = {
     hot: true,
     compress: true,
     historyApiFallback: true,
+    proxy: {
+      '/api': 'http://localhost:5000'
+    }
   },
   module: {
     rules: [
